@@ -145,13 +145,17 @@ FriendlyChat.prototype.saveMessage = function(e) {
 //    });
 //  }
   if (this.checkSignedInWithMessage()) {
+    console.log('You are signed in.');
+
     if (!this.codesRef) {
+      console.log('There is not a codesRef');
       this.codesRef = this.database.ref('codes');
-      this.codesRef.push({
-        name: this.auth.currentUser.displayName,
-        text: firepad.getText(),
-      });
     }
+
+    this.codesRef.push({
+      name: this.auth.currentUser.displayName,
+      text: firepad.getText(),
+    });
   }
 };
 
