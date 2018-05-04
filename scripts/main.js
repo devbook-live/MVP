@@ -15,7 +15,7 @@
  */
 'use strict';
 
-    function init() {
+FriendlyChat.prototype.initFirepad = function() {
       //// Initialize Firebase.
       //// TODO: replace with your Firebase project configuration.
       //var config = {
@@ -35,6 +35,7 @@
       var firepad = Firepad.fromCodeMirror(firepadRef, codeMirror, {
         defaultText: '// JavaScript Editing with Firepad!\nfunction go() {\n  var message = "Hello, world.";\n  console.log(message);\n}'
       });
+      this.firepad = firepad;
 
       firepad.on('ready', function() {
         console.log('ready called');
@@ -60,7 +61,7 @@
 
 // Initializes FriendlyChat.
 function FriendlyChat() {
-  init();
+  this.initFirepad();
   this.checkSetup();
 
   // Shortcuts to DOM Elements.
@@ -76,6 +77,13 @@ function FriendlyChat() {
   this.signInButton = document.getElementById('sign-in');
   this.signOutButton = document.getElementById('sign-out');
   this.signInSnackbar = document.getElementById('must-signin-snackbar');
+
+  // to run code:
+  this.runBtn = document.getElementById('run');
+  this.runBtn.addEventListener('click', this.runCode.bind(this));
+  this.result = document.getElementById('result');
+
+
 
   // Saves message on form submit.
   this.messageForm.addEventListener('submit', this.saveMessage.bind(this));
@@ -95,6 +103,13 @@ function FriendlyChat() {
   this.mediaCapture.addEventListener('change', this.saveImageMessage.bind(this));
 
   this.initFirebase();
+}
+
+FriendlyChat.prototype.runCode = function() {
+  console.log('got here')
+  const code = this.firepad.getText();
+  const result = eval(code);
+  this.result.innerHTML = result;
 }
 
 // Sets up shortcuts to Firebase features and initiate firebase auth.
