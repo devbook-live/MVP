@@ -15,7 +15,9 @@
  */
 'use strict';
 
-FriendlyChat.prototype.initFirepad = function() {
+var firepad;
+
+function init() {
       //// Initialize Firebase.
       //// TODO: replace with your Firebase project configuration.
       //var config = {
@@ -32,10 +34,9 @@ FriendlyChat.prototype.initFirepad = function() {
         mode: 'javascript'
       });
       //// Create Firepad.
-      var firepad = Firepad.fromCodeMirror(firepadRef, codeMirror, {
+      firepad = Firepad.fromCodeMirror(firepadRef, codeMirror, {
         defaultText: '// JavaScript Editing with Firepad!\nfunction go() {\n  var message = "Hello, world.";\n  console.log(message);\n}'
       });
-      this.firepad = firepad;
 
       firepad.on('ready', function() {
         console.log('ready called');
@@ -61,7 +62,7 @@ FriendlyChat.prototype.initFirepad = function() {
 
 // Initializes FriendlyChat.
 function FriendlyChat() {
-  this.initFirepad();
+  init();
   this.checkSetup();
 
   // Shortcuts to DOM Elements.
@@ -77,13 +78,6 @@ function FriendlyChat() {
   this.signInButton = document.getElementById('sign-in');
   this.signOutButton = document.getElementById('sign-out');
   this.signInSnackbar = document.getElementById('must-signin-snackbar');
-
-  // to run code:
-  this.runBtn = document.getElementById('run');
-  this.runBtn.addEventListener('click', this.runCode.bind(this));
-  this.result = document.getElementById('result');
-
-
 
   // Saves message on form submit.
   this.messageForm.addEventListener('submit', this.saveMessage.bind(this));
@@ -103,13 +97,6 @@ function FriendlyChat() {
   this.mediaCapture.addEventListener('change', this.saveImageMessage.bind(this));
 
   this.initFirebase();
-}
-
-FriendlyChat.prototype.runCode = function() {
-  console.log('got here')
-  const code = this.firepad.getText();
-  const result = eval(code);
-  this.result.innerHTML = result;
 }
 
 // Sets up shortcuts to Firebase features and initiate firebase auth.
@@ -140,22 +127,31 @@ FriendlyChat.prototype.loadMessages = function() {
 // Saves a new message on the Firebase DB.
 FriendlyChat.prototype.saveMessage = function(e) {
   e.preventDefault();
-  // Check that the user entered a message and is signed in.
-  if (this.messageInput.value && this.checkSignedInWithMessage()) {
-
-    // TODO(DEVELOPER): push new message to Firebase.
-
-    var currentUser = this.auth.currentUser;
-    this.messagesRef.push({
-      name: currentUser.displayName,
-      text: this.messageInput.value,
-      photoUrl: currentUser.photoURL || '/images/profile_placeholder.png'
-    }).then(function() {
-      FriendlyChat.resetMaterialTextfield(this.messageInput);
-      this.toggleButton();
-    }.bind(this)).catch(function(error) {
-      console.error('Error writing new message to Firebase Database', error);
-    });
+//  // Check that the user entered a message and is signed in.
+//  if (this.messageInput.value && this.checkSignedInWithMessage()) {
+//
+//    // TODO(DEVELOPER): push new message to Firebase.
+//
+//    var currentUser = this.auth.currentUser;
+//    this.messagesRef.push({
+//      name: currentUser.displayName,
+//      text: this.messageInput.value,
+//      photoUrl: currentUser.photoURL || '/images/profile_placeholder.png'
+//    }).then(function() {
+//      FriendlyChat.resetMaterialTextfield(this.messageInput);
+//      this.toggleButton();
+//    }.bind(this)).catch(function(error) {
+//      console.error('Error writing new message to Firebase Database', error);
+//    });
+//  }
+  if (this.checkSignedInWithMessage()) {
+    if (!this.codesRef) {
+      this.codesRef = this.database.ref('codes');
+      this.codesRef.push({
+        name: this.auth.currentUser.displayName,
+        text: firepad.getText(),
+      });
+    }
   }
 };
 
